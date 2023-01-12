@@ -23,7 +23,7 @@ const [IsSecureEntry2,setIsSecure2]=useState(true);
         </View>
       </View>
       <View style={{alignItems:'center'}}>
-        <Image style={{resizeMode : "center",height: 300, width: 300,marginTop:40}} source = {require('./images/QRCODe.png')} />
+        <Image style={{resizeMode : "center",height: 300, width: 300,marginTop:40}} source = {require('../images/QRCODe.png')} />
       </View>
       <View style={{marginHorizontal:25}}>
         <TouchableOpacity style={{

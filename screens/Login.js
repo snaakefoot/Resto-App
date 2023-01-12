@@ -2,12 +2,29 @@ import { StatusBar } from 'expo-status-bar';
 import { KeyboardAvoidingView,SafeAreaView, StyleSheet, Text, TextInput, View, Button, TouchableOpacity, Platform,ScrollView } from 'react-native';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons"
 import Ionicons from "react-native-vector-icons/Ionicons"
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import axios from 'axios';
+import SelectDropdown from 'react-native-select-dropdown'
+
+
 
 
 export default function Login({navigation}) {
+  const[index,setIndex]=useState(0);
+  const [selectedValue, setSelectedValue] = useState("");
+  const [selectedVal, setSelectedVal] = useState(0);
+  const options = ["Student","Worker"];
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [number, setNumber] = useState(0);
 
+  function handleChange(value) {
+    setSelectedOption(value);
+    if (selectedOption === 'Worker') {
+      setNumber(1);
+    }
+  }
+  
 const pressHandler=() =>{
   navigation.navigate('Register');
 }
@@ -15,6 +32,33 @@ const [IsSecureEntry,setIsSecure]=useState(true);
 const [email,SetEmail]=useState('')
 const [password,SetPassword]=useState('')
 const behavior=Platform.OS === "ios" ? "position" : "";
+const [error, setError] = useState(null);
+const data = new FormData();
+data.append('username', email);
+data.append('password', password);
+data.append('client_id', index);
+
+
+const login = async () => {
+  
+    await axios.post('http://10.0.2.2:8000/token/', data, { headers: { 'Content-Type': 'multipart/form-data' } })
+    .then(result => {
+    if (result.data.access_token) {
+      // Save the access_token in the header for future requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${result.data.access_token}`;
+      axios.defaults.headers.post['Authorization'] = `Bearer ${result.data.access_token}`;
+      if (index==0)
+        {navigation.navigate('HomeStudent')}
+      else 
+        {navigation.navigate('HomeWorker')}
+    }
+    
+}).catch(err => {
+    console.log(err.response.data)
+})
+    
+}
+
 
   return (
     <ScrollView>
@@ -57,7 +101,18 @@ const behavior=Platform.OS === "ios" ? "position" : "";
       <StatusBar style="auto" />
 
     </View>
-    <TouchableOpacity  style={{
+    <SelectDropdown
+                            value={selectedValue}
+                            data={options}
+                            onSelect={(selectedValue, indexa) => {
+                              setIndex(indexa)
+                            }}
+                            
+                          
+                      />    
+    <TouchableOpacity 
+    onPress={()=>login()} 
+    style={{
         paddingVertical:20,
         marginTop:40,
         backgroundColor:"#E93C49",
@@ -67,6 +122,7 @@ const behavior=Platform.OS === "ios" ? "position" : "";
 
         <Text style={{color:"#fff",textAlign:"center"}}> Login</Text>
       </TouchableOpacity>
+      {error && <Text style={styles.error}>{error}</Text>}
       <TouchableOpacity>
       <Text style={{textDecorationLine: 'underline', color:"#666",textAlign:"center",marginTop:10}}>Forgot Password?</Text>
       
@@ -93,4 +149,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     
   },
+  error:{
+    color:"red",
+
+  }
 });
